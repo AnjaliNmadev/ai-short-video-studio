@@ -41,7 +41,7 @@ import {
 import { removeFiles, uploadPublic } from "@/lib/storage";
 import { removeCleanFiles, uploadClean } from "@/lib/storage-clean";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import type { GenerationResult } from "@/types/generation";
 
 // ffmpeg, sharp, and fs need the Node.js runtime (not Edge).
@@ -78,10 +78,7 @@ async function readTopic(request: Request): Promise<string | null> {
 
 export async function POST(request: Request) {
   /* ---------------------------- 1. Authenticate ---------------------------- */
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return fail("unauthorized", 401);
 
   /* ----------------------------- 2. Validate ------------------------------- */

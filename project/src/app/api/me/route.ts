@@ -7,22 +7,20 @@
 import { NextResponse } from "next/server";
 import { CONFIG } from "@/config/generation";
 import { getCreditStatus } from "@/lib/credits";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   try {
     const { creditsLeft, isPro } = await getCreditStatus(user.id);
     return NextResponse.json(
       {
-        email: user.email ?? null,
+        email: user.email,
+        guest: user.guest,
         creditsLeft,
         isPro,
         // true when this user is never charged (Pro + CONFIG.proSkipsCredits)

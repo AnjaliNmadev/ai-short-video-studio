@@ -19,7 +19,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { CONFIG } from "@/config/generation";
 import { activatePro } from "@/lib/billing";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,11 +28,10 @@ const fail = (error: string, status: number) =>
   NextResponse.json({ error }, { status });
 
 export async function POST() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return fail("unauthorized", 401);
+  // The guest user is shared by all visitors, so upgrading it would give everyone Pro.
+  if (user.guest) return fail("login_required", 403);
 
   if ((process.env.BILLING_MODE ?? "mock") !== "mock") {
     return fail("not_implemented", 501); // real provider: see the note above

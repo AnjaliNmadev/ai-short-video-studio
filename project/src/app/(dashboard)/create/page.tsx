@@ -254,6 +254,7 @@ export default function StudioPage() {
 
   const generating = status === "generating";
   const trimmed = topic.trim();
+  const [guest, setGuest] = useState(false);
   const outOfCredits = !unlimited && credits <= 0;
   const canGenerate = trimmed.length >= 3 && !generating && !outOfCredits;
 
@@ -267,6 +268,7 @@ export default function StudioPage() {
         setCredits(me.creditsLeft);
         setIsPro(me.isPro);
         setUnlimited(me.unlimited);
+        setGuest(!!me.guest);
       })
       .catch(() => {}); // keep the defaults; the server still enforces credits
   }, []);
@@ -350,6 +352,7 @@ export default function StudioPage() {
               </span>
             )}
           </Link>
+          {!guest && (
           <form action="/auth/signout" method="post">
             <button
               type="submit"
@@ -358,6 +361,7 @@ export default function StudioPage() {
               Sign out
             </button>
           </form>
+          )}
           </div>
         </div>
       </header>

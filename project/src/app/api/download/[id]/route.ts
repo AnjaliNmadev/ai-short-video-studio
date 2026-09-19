@@ -22,7 +22,7 @@ import { CONFIG } from "@/config/generation";
 import { getCreditStatus } from "@/lib/credits";
 import { signCleanDownload } from "@/lib/storage-clean";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -64,10 +64,7 @@ export async function GET(
     return fail("bad_request", 400);
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return fail("unauthorized", 401);
 
   // The admin client bypasses RLS, so ownership is enforced by hand: the row

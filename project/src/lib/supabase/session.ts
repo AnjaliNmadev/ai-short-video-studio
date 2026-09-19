@@ -28,6 +28,17 @@ function redirectKeepingCookies(url: URL, from: NextResponse) {
 }
 
 export async function updateSession(request: NextRequest) {
+  // Guest mode (AUTH_DISABLED=true): no login. /login just goes to the app.
+  if (process.env.AUTH_DISABLED === "true") {
+    if (request.nextUrl.pathname === "/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/create";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
