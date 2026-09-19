@@ -8,8 +8,9 @@
  * This is a convenience layer, NOT the security boundary: every route handler
  * still calls supabase.auth.getUser() itself (see /api/generate, /api/download).
  */
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+ import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server"; 
+type CookieToSet = { name: string; value: string; options?: CookieOptions }; 
 
 /** Pages a signed-out visitor may open. Everything else needs a session. */
 const PUBLIC_EXACT = ["/"];
@@ -35,7 +36,7 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
